@@ -86,10 +86,16 @@ void helprec(poly *c, const poly *v, const unsigned char *seed, unsigned char no
   {
     rbit = (rand[i>>3] >> (i&7)) & 1;
 
-    k  = f(v0+0, v1+0, 8*v->v[  0+i] + 4*PARAM_Q*rbit);
-    k += f(v0+1, v1+1, 8*v->v[256+i] + 4*PARAM_Q*rbit);
-    k += f(v0+2, v1+2, 8*v->v[512+i] + 4*PARAM_Q*rbit);
-    k += f(v0+3, v1+3, 8*v->v[768+i] + 4*PARAM_Q*rbit);
+    /*
+    k  = f(v0+0, v1+0, 8*v->v[  0+i] + PARAM_Q*rbit);
+    k += f(v0+1, v1+1, 8*v->v[256+i] + PARAM_Q*rbit);
+    k += f(v0+2, v1+2, 8*v->v[512+i] + PARAM_Q*rbit);
+    k += f(v0+3, v1+3, 8*v->v[768+i] + PARAM_Q*rbit);
+    */
+    k  = f(v0+0, v1+0, 8*v->v[  0+i] + 4*rbit);
+    k += f(v0+1, v1+1, 8*v->v[256+i] + 4*rbit);
+    k += f(v0+2, v1+2, 8*v->v[512+i] + 4*rbit);
+    k += f(v0+3, v1+3, 8*v->v[768+i] + 4*rbit);
 
     k = (2*PARAM_Q-1-k) >> 31;
 
@@ -101,6 +107,7 @@ void helprec(poly *c, const poly *v, const unsigned char *seed, unsigned char no
     c->v[  0+i] = (v_tmp[0] -   v_tmp[3]) & 3;  
     c->v[256+i] = (v_tmp[1] -   v_tmp[3]) & 3;
     c->v[512+i] = (v_tmp[2] -   v_tmp[3]) & 3;
+//    c->v[768+i] = (   -k    + 2*v_tmp[3] + 4-rbit) & 3;
     c->v[768+i] = (   -k    + 2*v_tmp[3]) & 3;
   }
 }

@@ -133,11 +133,6 @@ vpand %ymm0,%ymm2,%ymm2
 # asm 2: vpslld $2,<rbit=%ymm2,>rbit=%ymm2
 vpslld $2,%ymm2,%ymm2
 
-# qhasm: 8x rbit *= qx8
-# asm 1: vpmulld <qx8=reg256#2,<rbit=reg256#3,>rbit=reg256#3
-# asm 2: vpmulld <qx8=%ymm1,<rbit=%ymm2,>rbit=%ymm2
-vpmulld %ymm1,%ymm2,%ymm2
-
 # qhasm: ctr <<= 5
 # asm 1: shl  $5,<ctr=int64#4
 # asm 2: shl  $5,<ctr=%rcx

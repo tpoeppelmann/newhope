@@ -28,8 +28,7 @@ int test_keys(){
   unsigned char key_a[32], key_b[32];
   unsigned char senda[POLY_BYTES];
   unsigned char sendb[POLY_BYTES];
-  poly t;
-  int i,j;
+  int i;
 
 
 
@@ -37,20 +36,15 @@ int test_keys(){
   {
     //Alice generates a public key
     newhope_keygen(senda, &sk_a);
-    poly_frombytes(&t,senda);
-    for(j=0;j<PARAM_N;j++)
-      if(t.v[i] >= PARAM_Q) printf("-42");
 
     //Bob derives a secret key and creates a response
     newhope_sharedb(key_b, sendb, senda);
-    poly_frombytes(&t,sendb);
-    for(j=0;j<PARAM_N;j++)
-      if(t.v[i] >= PARAM_Q) printf("-42");
   
     //Alice uses Bobs response to get her secre key
     newhope_shareda(key_a, &sk_a, sendb);
 
-    printf("%d\n", memcmp(key_a, key_b, 32));
+    if(memcmp(key_a, key_b, 32))
+      printf("ERROR keys\n");
   }
 
   return 0;
@@ -64,7 +58,7 @@ int test_invalid_sk_a()
   unsigned char sendb[POLY_BYTES];
   unsigned char noiseseed[32];
   int i;
-
+  
   randombytes(noiseseed,32);
 
   for(i=0; i<NTESTS; i++)
@@ -81,7 +75,8 @@ int test_invalid_sk_a()
     //Alice uses Bobs response to get her secre key
     newhope_shareda(key_a, &sk_a, sendb);
 
-    printf("%d\n", !memcmp(key_a, key_b, 32));
+    if(!memcmp(key_a, key_b, 32))
+      printf("ERROR invalid sk_a\n");
   }
   return 0;
 }
@@ -109,8 +104,8 @@ int test_invalid_ciphertext()
     //Alice uses Bobs response to get her secre key
     newhope_shareda(key_a, &sk_a, sendb);
 
-    printf("%d\n", !memcmp(key_a, key_b, 32));
-
+    if(!memcmp(key_a, key_b, 32))
+      printf("ERROR invalid sendb\n");
   }
 
   return 0;
@@ -120,9 +115,7 @@ int test_invalid_ciphertext()
 int main(){
 
   test_keys();
-  /*
   test_invalid_sk_a();
   test_invalid_ciphertext();
-  */
   return 0;
 }

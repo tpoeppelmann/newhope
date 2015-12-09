@@ -43,7 +43,8 @@ int test_keys(){
     //Alice uses Bobs response to get her secre key
     newhope_shareda(key_a, &sk_a, sendb);
 
-    printf("%d\n", memcmp(key_a, key_b, 32));
+    if(memcmp(key_a, key_b, 32))
+      printf("ERROR keys\n");
   }
 
   return 0;
@@ -74,7 +75,8 @@ int test_invalid_sk_a()
     //Alice uses Bobs response to get her secre key
     newhope_shareda(key_a, &sk_a, sendb);
 
-    printf("%d\n", !memcmp(key_a, key_b, 32));
+    if(!memcmp(key_a, key_b, 32))
+      printf("ERROR invalid sk_a\n");
   }
   return 0;
 }
@@ -102,8 +104,8 @@ int test_invalid_ciphertext()
     //Alice uses Bobs response to get her secre key
     newhope_shareda(key_a, &sk_a, sendb);
 
-    printf("%d\n", !memcmp(key_a, key_b, 32));
-
+    if(!memcmp(key_a, key_b, 32))
+      printf("ERROR invalid sendb\n");
   }
 
   return 0;

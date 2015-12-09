@@ -75,8 +75,8 @@ extern void cbd(poly *r, unsigned char *b);
 
 void poly_getnoise(poly *r, unsigned char *seed, unsigned char nonce)
 {
-#if PARAM_K != 12
-#error "poly_getnoise in poly.c only supports k=12"
+#if PARAM_K != 8
+#error "poly_getnoise in poly.c only supports k=8"
 #endif
   unsigned char buf[3*PARAM_N];
   unsigned char n[CRYPTO_STREAM_NONCEBYTES];

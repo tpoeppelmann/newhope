@@ -28,12 +28,12 @@ def chi(i):
 
 
 ### Sanity check of proper normalization 
-assert (sum([chi(i) for i in supp_chi]) - 1.) < 2.**(-45)
-assert (sum([psi(i) for i in supp_psi]) - 1.) < 2.**(-45)
+assert (1. - (sum([chi(i) for i in supp_chi]))) < 2.**(-45)
+assert (1. - (sum([psi(i) for i in supp_psi]))) < 2.**(-45)
 
 
 ### Compute the Renyi Sum
-a = 10.
+a = 9.
 S = 0.
 for k in supp_psi:
 	S += (psi(k)**a) / (chi(k)**(a-1))

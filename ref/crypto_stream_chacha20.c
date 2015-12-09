@@ -14,8 +14,7 @@ static uint32 load_littleendian(const unsigned char *x)
       (uint32) (x[0]) \
   | (((uint32) (x[1])) << 8) \
   | (((uint32) (x[2])) << 16) \
-  | (((uint32) (x[3])) << 24)
-  ;
+  | (((uint32) (x[3])) << 24);
 }
 
 static void store_littleendian(unsigned char *x,uint32 u)

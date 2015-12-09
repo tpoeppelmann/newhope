@@ -111,7 +111,9 @@ void newhope_sharedb(unsigned char *sharedkey, unsigned char *send, const unsign
   
   rec(sharedkey, &v, &c);
 
+#ifndef STATISTICAL_TEST 
   sha3256(sharedkey, sharedkey, 32);
+#endif
 }
 
 
@@ -126,5 +128,7 @@ void newhope_shareda(unsigned char *sharedkey, const poly *sk, const unsigned ch
   poly_invntt(&v);
  
   rec(sharedkey, &v, &c);
+#ifndef STATISTICAL_TEST 
   sha3256(sharedkey, sharedkey, 32); 
+#endif
 }
