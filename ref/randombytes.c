@@ -4,8 +4,6 @@
 #include <unistd.h>
 #include "randombytes.h"
 
-/* it's really stupid that there isn't a syscall for this */
-
 static int fd = -1;
 
 void randombytes(unsigned char *x,unsigned long long xlen)

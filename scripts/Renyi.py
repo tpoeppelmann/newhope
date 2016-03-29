@@ -1,7 +1,7 @@
 from math import *
 from scipy.special import erf,binom
 
-k = 12
+k = 16
 
 ## Construct the centered binomial pdf
 L_Bnn = [binom(2*k,k+i) for i in range(k+1)]
@@ -14,9 +14,10 @@ def psi(i):
 supp_psi = xrange(-k,k+1)
 
 ### Construct the rounded_gaussian pdf
-sig = sqrt(k/2.)
-tail = 30
-supp_chi = xrange(int(floor(-tail*sig)),int(ceil(tail*sig+1)))
+sig = sqrt(k/2)
+tau = 30
+tail = int(ceil(tau*sig))
+supp_chi = xrange(-tail,tail+1)
 
 ### Define the cdf of the continuous gaussian of variance 1
 def Phi(z): 
@@ -28,8 +29,8 @@ def chi(i):
 
 
 ### Sanity check of proper normalization 
-assert (1. - (sum([chi(i) for i in supp_chi]))) < 2.**(-45)
-assert (1. - (sum([psi(i) for i in supp_psi]))) < 2.**(-45)
+assert (sum([chi(i) for i in supp_chi]) - 1.) < 2.**(-45)
+assert (sum([psi(i) for i in supp_psi]) - 1.) < 2.**(-45)
 
 
 ### Compute the Renyi Sum
@@ -40,5 +41,5 @@ for k in supp_psi:
 R = S**(1./(a-1))
 
 ### Print the result
-print "R_5 ( psi || chi ) = ", R
-print "R_5 (  P  ||  Q  ) = ", R**(5*1024)
+print "R_",a," ( psi || chi ) = ", R
+print "R_",a," (  P  ||  Q  ) = ", R**(5*1024)

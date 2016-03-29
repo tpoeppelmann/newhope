@@ -19,28 +19,57 @@ static uint16_t barrett_reduce(uint16_t a)
 void poly_frombytes(poly *r, const unsigned char *a)
 {
   int i;
-  for(i=0;i<PARAM_N;i++)
+  for(i=0;i<PARAM_N/4;i++)
   {
-    r->v[i] = a[2*i] | ((uint16_t) (a[2*i+1] & 0x3f) << 8);
+    r->coeffs[4*i+0] =                               a[7*i+0]        | (((uint16_t)a[7*i+1] & 0x3f) << 8);
+    r->coeffs[4*i+1] = (a[7*i+1] >> 6) | (((uint16_t)a[7*i+2]) << 2) | (((uint16_t)a[7*i+3] & 0x0f) << 10);
+    r->coeffs[4*i+2] = (a[7*i+3] >> 4) | (((uint16_t)a[7*i+4]) << 4) | (((uint16_t)a[7*i+5] & 0x03) << 12);
+    r->coeffs[4*i+3] = (a[7*i+5] >> 2) | (((uint16_t)a[7*i+6]) << 6); 
   }
 }
 
 void poly_tobytes(unsigned char *r, const poly *p)
 {
   int i;
-  uint16_t t,m;
+  uint16_t t0,t1,t2,t3,m;
   int16_t c;
-  for(i=0;i<PARAM_N;i++)
+  for(i=0;i<PARAM_N/4;i++)
   {
-    t = barrett_reduce(p->v[i]); //Make sure that coefficients have only 14 bits
-    m = t - PARAM_Q;
+    t0 = barrett_reduce(p->coeffs[4*i+0]); //Make sure that coefficients have only 14 bits
+    t1 = barrett_reduce(p->coeffs[4*i+1]);
+    t2 = barrett_reduce(p->coeffs[4*i+2]);
+    t3 = barrett_reduce(p->coeffs[4*i+3]);
+
+    m = t0 - PARAM_Q;
     c = m;
     c >>= 15;
-    t = m ^ ((t^m)&c); // <Make sure that coefficients are in [0,q]
-    r[2*i]   = t & 0xff;
-    r[2*i+1] = t >> 8;
+    t0 = m ^ ((t0^m)&c); // <Make sure that coefficients are in [0,q]
+
+    m = t1 - PARAM_Q;
+    c = m;
+    c >>= 15;
+    t1 = m ^ ((t1^m)&c); // <Make sure that coefficients are in [0,q]
+
+    m = t2 - PARAM_Q;
+    c = m;
+    c >>= 15;
+    t2 = m ^ ((t2^m)&c); // <Make sure that coefficients are in [0,q]
+
+    m = t3 - PARAM_Q;
+    c = m;
+    c >>= 15;
+    t3 = m ^ ((t3^m)&c); // <Make sure that coefficients are in [0,q]
+
+    r[7*i+0] =  t0 & 0xff;
+    r[7*i+1] = (t0 >> 8) | (t1 << 6);
+    r[7*i+2] = (t1 >> 2);
+    r[7*i+3] = (t1 >> 10) | (t2 << 4);
+    r[7*i+4] = (t2 >> 4);
+    r[7*i+5] = (t2 >> 12) | (t3 << 2);
+    r[7*i+6] = (t3 >> 6);
   }
 }
+
 
 
 void poly_uniform(poly *a, const unsigned char *seed)
@@ -59,7 +88,7 @@ void poly_uniform(poly *a, const unsigned char *seed)
   {
     val = (buf[pos] | ((uint16_t) buf[pos+1] << 8)) & 0x3fff; // Specialized for q = 12889
     if(val < PARAM_Q)
-      a->v[ctr++] = val;
+      a->coeffs[ctr++] = val;
     pos += 2;
     if(pos > SHAKE128_RATE*nblocks-2)
     {
@@ -75,10 +104,10 @@ extern void cbd(poly *r, unsigned char *b);
 
 void poly_getnoise(poly *r, unsigned char *seed, unsigned char nonce)
 {
-#if PARAM_K != 8
-#error "poly_getnoise in poly.c only supports k=8"
+#if PARAM_K != 16
+#error "poly_getnoise in poly.c only supports k=16"
 #endif
-  unsigned char buf[3*PARAM_N];
+  unsigned char buf[4*PARAM_N];
   unsigned char n[CRYPTO_STREAM_NONCEBYTES];
   int i;
 
@@ -86,7 +115,7 @@ void poly_getnoise(poly *r, unsigned char *seed, unsigned char nonce)
     n[i] = 0;
   n[0] = nonce;
 
-  crypto_stream(buf,3*PARAM_N,n,seed);
+  crypto_stream(buf,4*PARAM_N,n,seed);
   cbd(r,buf);
 }
 
@@ -94,33 +123,29 @@ void poly_pointwise(poly *r, const poly *a, const poly *b)
 {
   int i;
   for(i=0;i<PARAM_N;i++)
-    r->v[i] = a->v[i] * b->v[i] % PARAM_Q; /* XXX: Get rid of the % here! */
+    r->coeffs[i] = a->coeffs[i] * b->coeffs[i] % PARAM_Q; /* XXX: Get rid of the % here! */
 }
 
 void poly_add(poly *r, const poly *a, const poly *b)
 {
   int i;
   for(i=0;i<PARAM_N;i++)
-    r->v[i] = a->v[i] + b->v[i] % PARAM_Q; /* XXX: Get rid of the % here! */
-}
-
-void poly_bitrev(poly *r)
-{
-  bitrev_vector(r->v);
+    r->coeffs[i] = a->coeffs[i] + b->coeffs[i] % PARAM_Q; /* XXX: Get rid of the % here! */
 }
 
 void poly_ntt(poly *r)
 {
   double temp[PARAM_N];
 
-  pwmul_double(r->v, psis_bitrev);
-  ntt_double(r->v,omegas_double,temp);
+  pwmul_double(r->coeffs, psis_bitrev);
+  ntt_double(r->coeffs,omegas_double,temp);
 }
 
 void poly_invntt(poly *r)
 {
   double temp[PARAM_N];
 
-  ntt_double(r->v, omegas_inv_double,temp);
-  pwmul_double(r->v, psis_inv);
+  bitrev_vector(r->coeffs);
+  ntt_double(r->coeffs, omegas_inv_double,temp);
+  pwmul_double(r->coeffs, psis_inv);
 }

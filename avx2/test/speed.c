@@ -53,15 +53,15 @@ int main()
 {
   poly sk_a;
   unsigned char key_a[32], key_b[32];
-  unsigned char senda[POLY_BYTES];
-  unsigned char sendb[POLY_BYTES];
-  unsigned char seed[NTESTS*32];
+  unsigned char senda[NTESTS*NEWHOPE_SENDABYTES];
+  unsigned char sendb[NTESTS*NEWHOPE_SENDBBYTES];
+  unsigned char seed[NEWHOPE_SEEDBYTES];
   int i;
 
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
-    randombytes(seed, 32);
+    randombytes(seed, NEWHOPE_SEEDBYTES);
     poly_uniform(&sk_a, seed);
   }
   print_results("poly_uniform: ", t, NTESTS);
@@ -76,7 +76,6 @@ int main()
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
-    poly_bitrev(&sk_a);
     poly_invntt(&sk_a);
   }
   print_results("poly_invntt: ", t, NTESTS);
@@ -105,21 +104,21 @@ int main()
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
-    newhope_keygen(senda, &sk_a);
+    newhope_keygen(senda+i*NEWHOPE_SENDABYTES, &sk_a);
   }
   print_results("newhope_keygen: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
-    newhope_sharedb(key_b, sendb, senda);
+    newhope_sharedb(key_b, sendb+i*NEWHOPE_SENDBBYTES, senda+i*NEWHOPE_SENDABYTES);
   }
   print_results("newhope_sharedb: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
-    newhope_shareda(key_a, &sk_a, sendb);
+    newhope_shareda(key_a, &sk_a, sendb+i*NEWHOPE_SENDBBYTES);
   }
   print_results("newhope_shareda: ", t, NTESTS);
     

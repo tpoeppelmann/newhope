@@ -9,7 +9,7 @@ extern double omegas_double[];
 extern double omegas_inv_double[];
 
 void bitrev_vector(int32_t* poly);
-void pwmul_double(int32_t* poly, int32_t* factors);
+void pwmul_double(int32_t* poly, const int32_t* factors);
 void ntt_double(int32_t*,const double*,const double*);
 
 #endif

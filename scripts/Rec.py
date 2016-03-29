@@ -2,6 +2,8 @@ from math import *
 import operator as op
 import numpy as np
 from random import *
+import sys
+
 
 
 q = 12289
@@ -18,6 +20,13 @@ def modq(x):
 def modqv(L):
 	return map(modq,L)
 
+def mod1(x):
+	return (x+.5) % 1 - .5
+
+def mod1v(L):
+	return map(mod1,L)
+
+
 def mod4(x):
 	return x %4
 
@@ -26,7 +35,7 @@ def mod4v(L):
 
 
 def LDEncode(k):
-	return 4*[(k % 2) * q2]
+	return 4*[(k % 2)/2.]
 
 
 def norm2(x):
@@ -57,23 +66,25 @@ for i in range(Tests):
 		print "Norm l_oo condition violated (Type B Voronoi Relevant Vector)"
 		exit(0)
 print "All",Tests, "tests passed"
-
+sys.stdout.flush()
 
 def LDDecode(x):
-	if norm1(modqv(x)) <= q:
+	if norm1(mod1v(x)) <= 1:
 		return 0
 	return 1
 
 
 def HelpRec(x):
 	b = randint(0,1)
-	c = CVPD4(4 * (1./q * x + b * g))
+	c = CVPD4(4 * (1./q * x + 1.*b * g/q))
 	return mod4(c)
 
-
+def Rec(x,r):
+	return LDDecode(1./q * x - .25 * np.array((r * B).flat))
 
 print "testing Reconciliation"
 h = 0
+
 for ii in range(Tests):
 	x = np.array([randint(0,q-1) for i in range(4)])
 	e = np.array([np.random.normal(0,500) for i in range(4)])
@@ -82,13 +93,29 @@ for ii in range(Tests):
 		print h,ii,norminfty(e)
 	xx = x + e
 	r = HelpRec(x)
-	v = np.array(x - q/4. * r * B)[0]
-	k = LDDecode(v)
-	vv = np.array(xx - q/4. * r * B)[0]
-	kk = LDDecode(vv)
+	k = Rec(x,r)
+	kk = Rec(xx,r)
 	if not k==kk:
 		print "Key agreement failure"
 		print ii,norm1(e)
 		exit(0)
 
 print "All",Tests, "tests passed"
+sys.stdout.flush()
+print "Getting stats"
+sys.stdout.flush()
+h = 0
+
+sample = 256*100000
+
+for i in range(20):
+	s = 0
+	for ii in range(sample):
+		x = np.array([randint(0,q-1) for i in range(4)])
+		r = HelpRec(x)
+		k = Rec(x,r)
+		s += k
+
+	print sample ,s, 1.*s/sample
+	print "diff :", sample - 2*s
+	sys.stdout.flush()

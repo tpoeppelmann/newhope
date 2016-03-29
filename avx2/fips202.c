@@ -404,7 +404,7 @@ void shake128(unsigned char *output, unsigned int outputByteLen, const unsigned 
 
 void sha3256(unsigned char *output, const unsigned char *input, unsigned int inputByteLen)
 {
-  uint64_t s[64];
+  uint64_t s[25];
   unsigned char t[SHA3_256_RATE];
   int i;
 

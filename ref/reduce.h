@@ -1,5 +1,5 @@
-#ifndef BARRETT_H
-#define BARRETT_H
+#ifndef REDUCE_H
+#define REDUCE_H
 
 #include <stdint.h>
 

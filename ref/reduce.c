@@ -1,6 +1,10 @@
 #include "reduce.h"
 #include "params.h"
 
+/* Incomplete-reduction routines; for details on allowed input ranges
+ * and produced output ranges, see the description in the paper: 
+ * https://cryptojedi.org/papers/#newhope */
+
 
 static const uint32_t qinv = 12287; // -inverse_mod(p,2^18)
 static const uint32_t rlog = 18;

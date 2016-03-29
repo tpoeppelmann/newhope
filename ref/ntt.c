@@ -55,7 +55,7 @@ void bitrev_vector(uint16_t* poly)
     }
 }
  
-void mul_coefficients(uint16_t* poly, uint16_t* factors)
+void mul_coefficients(uint16_t* poly, const uint16_t* factors)
 {
     unsigned int i;
 

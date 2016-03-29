@@ -7,7 +7,7 @@ CFILES  = crypto_stream_chacha20.c poly.c ntt.c precomp.c error_correction.c new
 all:	test/test_newhope \
 			test/test_statistical \
 			test/speed  \
-			test/testvectors
+			test/testvectors \
 
 test/test_newhope: $(HEADERS) $(CFILES) test/test_newhope.c randombytes.c
 	$(CC) $(CFLAGS) $(CFILES) randombytes.c test/test_newhope.c -o $@
@@ -21,13 +21,11 @@ test/speed: $(HEADERS) $(CFILES) test/speed.c cpucycles.c randombytes.c
 test/testvectors: $(HEADERS) $(CFILES) test/testvectors.c
 	$(CC) $(CFLAGS) $(CFILES) test/testvectors.c cpucycles.c -o $@
 
-
 .PHONY: clean
 
 clean:
-	-rm *.o
 	-rm test/test_newhope	
+	-rm test/test_statistical
 	-rm test/speed
 	-rm test/testvectors
-	-rm test/test_statistical
 

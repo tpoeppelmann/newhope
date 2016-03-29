@@ -61,8 +61,8 @@ int main(void)
 {
   poly sk_a;
   unsigned char key_a[32], key_b[32];
-  unsigned char senda[POLY_BYTES];
-  unsigned char sendb[POLY_BYTES];
+  unsigned char senda[NEWHOPE_SENDABYTES];
+  unsigned char sendb[NEWHOPE_SENDBBYTES];
   int i,j;
 
 
@@ -70,12 +70,12 @@ int main(void)
   for(i=0;i<NTESTS;i++)
   {
     newhope_keygen(senda, &sk_a);
-    for(j=0;j<POLY_BYTES;j++)
+    for(j=0;j<NEWHOPE_SENDABYTES;j++)
       printf("%02x",senda[j]);
     printf("\n");
 
     newhope_sharedb(key_b, sendb, senda);
-    for(j=0;j<POLY_BYTES;j++)
+    for(j=0;j<NEWHOPE_SENDBBYTES;j++)
       printf("%02x",sendb[j]);
     printf("\n");
 

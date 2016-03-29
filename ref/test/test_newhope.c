@@ -15,7 +15,7 @@ int compare_keys(poly *a, poly *b){
   int i;
 
   for(i=0; i<256; i++){
-    if (a->v[i] != b->v[i]){
+    if (a->coeffs[i] != b->coeffs[i]){
       return -1;
     }
   }
@@ -26,8 +26,8 @@ int compare_keys(poly *a, poly *b){
 int test_keys(){
   poly sk_a;
   unsigned char key_a[32], key_b[32];
-  unsigned char senda[POLY_BYTES];
-  unsigned char sendb[POLY_BYTES];
+  unsigned char senda[NEWHOPE_SENDABYTES];
+  unsigned char sendb[NEWHOPE_SENDBBYTES];
   int i;
 
 
@@ -54,8 +54,8 @@ int test_invalid_sk_a()
 {
   poly sk_a;
   unsigned char key_a[32], key_b[32];
-  unsigned char senda[POLY_BYTES];
-  unsigned char sendb[POLY_BYTES];
+  unsigned char senda[NEWHOPE_SENDABYTES];
+  unsigned char sendb[NEWHOPE_SENDBBYTES];
   unsigned char noiseseed[32];
   int i;
   
@@ -86,8 +86,8 @@ int test_invalid_ciphertext()
 {
   poly sk_a;
   unsigned char key_a[32], key_b[32];
-  unsigned char senda[POLY_BYTES];
-  unsigned char sendb[POLY_BYTES];
+  unsigned char senda[NEWHOPE_SENDABYTES];
+  unsigned char sendb[NEWHOPE_SENDBBYTES];
   int i;
 
   for(i=0; i<10; i++)

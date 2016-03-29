@@ -86,16 +86,10 @@ void helprec(poly *c, const poly *v, const unsigned char *seed, unsigned char no
   {
     rbit = (rand[i>>3] >> (i&7)) & 1;
 
-    /*
-    k  = f(v0+0, v1+0, 8*v->v[  0+i] + PARAM_Q*rbit);
-    k += f(v0+1, v1+1, 8*v->v[256+i] + PARAM_Q*rbit);
-    k += f(v0+2, v1+2, 8*v->v[512+i] + PARAM_Q*rbit);
-    k += f(v0+3, v1+3, 8*v->v[768+i] + PARAM_Q*rbit);
-    */
-    k  = f(v0+0, v1+0, 8*v->v[  0+i] + 4*rbit);
-    k += f(v0+1, v1+1, 8*v->v[256+i] + 4*rbit);
-    k += f(v0+2, v1+2, 8*v->v[512+i] + 4*rbit);
-    k += f(v0+3, v1+3, 8*v->v[768+i] + 4*rbit);
+    k  = f(v0+0, v1+0, 8*v->coeffs[  0+i] + 4*rbit);
+    k += f(v0+1, v1+1, 8*v->coeffs[256+i] + 4*rbit);
+    k += f(v0+2, v1+2, 8*v->coeffs[512+i] + 4*rbit);
+    k += f(v0+3, v1+3, 8*v->coeffs[768+i] + 4*rbit);
 
     k = (2*PARAM_Q-1-k) >> 31;
 
@@ -104,11 +98,10 @@ void helprec(poly *c, const poly *v, const unsigned char *seed, unsigned char no
     v_tmp[2] = ((~k) & v0[2]) ^ (k & v1[2]);
     v_tmp[3] = ((~k) & v0[3]) ^ (k & v1[3]);
 
-    c->v[  0+i] = (v_tmp[0] -   v_tmp[3]) & 3;  
-    c->v[256+i] = (v_tmp[1] -   v_tmp[3]) & 3;
-    c->v[512+i] = (v_tmp[2] -   v_tmp[3]) & 3;
-//    c->v[768+i] = (   -k    + 2*v_tmp[3] + 4-rbit) & 3;
-    c->v[768+i] = (   -k    + 2*v_tmp[3]) & 3;
+    c->coeffs[  0+i] = (v_tmp[0] -   v_tmp[3]) & 3;  
+    c->coeffs[256+i] = (v_tmp[1] -   v_tmp[3]) & 3;
+    c->coeffs[512+i] = (v_tmp[2] -   v_tmp[3]) & 3;
+    c->coeffs[768+i] = (   -k    + 2*v_tmp[3]) & 3;
   }
 }
 
@@ -123,10 +116,10 @@ void rec(unsigned char *key, const poly *v, const poly *c)
 
   for(i=0; i<256; i++)
   {
-    tmp[0] = 16*PARAM_Q + 8*(int32_t)v->v[  0+i] - PARAM_Q * (2*c->v[  0+i]+c->v[768+i]);
-    tmp[1] = 16*PARAM_Q + 8*(int32_t)v->v[256+i] - PARAM_Q * (2*c->v[256+i]+c->v[768+i]);
-    tmp[2] = 16*PARAM_Q + 8*(int32_t)v->v[512+i] - PARAM_Q * (2*c->v[512+i]+c->v[768+i]);
-    tmp[3] = 16*PARAM_Q + 8*(int32_t)v->v[768+i] - PARAM_Q * (              c->v[768+i]);
+    tmp[0] = 16*PARAM_Q + 8*(int32_t)v->coeffs[  0+i] - PARAM_Q * (2*c->coeffs[  0+i]+c->coeffs[768+i]);
+    tmp[1] = 16*PARAM_Q + 8*(int32_t)v->coeffs[256+i] - PARAM_Q * (2*c->coeffs[256+i]+c->coeffs[768+i]);
+    tmp[2] = 16*PARAM_Q + 8*(int32_t)v->coeffs[512+i] - PARAM_Q * (2*c->coeffs[512+i]+c->coeffs[768+i]);
+    tmp[3] = 16*PARAM_Q + 8*(int32_t)v->coeffs[768+i] - PARAM_Q * (              c->coeffs[768+i]);
 
     key[i>>3] |= LDDecode(tmp[0], tmp[1], tmp[2], tmp[3]) << (i & 7);
   }
