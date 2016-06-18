@@ -12,19 +12,18 @@ def delta_BKZ(b):
 
 ## log_2 of best plausible Quantum Cost of SVP in dimension b
 def svp_plausible(b):
-	return .2075 * b  # + log(b)/log(2)
+	return b *log(sqrt(4./3))/log(2)   # .2075 * b 
 
 ## log_2 of best plausible Quantum Cost of SVP in dimension b
 def svp_quantum(b):
-	return .262 * b  # + log(b)/log(2)
+	return b *log(sqrt(13./9))/log(2) # .265 * b  [Laarhoven Thesis]
 
 ## log_2 of best known Quantum Cost of SVP in dimension b
 def svp_classical(b):
-	return .292 * b  # + log(b)/log(2)
+	return b *log(sqrt(3./2))/log(2) # .292 * b [Becker Ducas Laarhoven Gama]
 
 def nvec_sieve(b):
-	return .2075 * b
-
+	return b *log(sqrt(4./3))/log(2) #.2075 * b
 
 
 ## Return the cost of the primal attack using m samples and blocksize b (infinity = fail)
@@ -35,7 +34,7 @@ def primal_cost(q,n,m,s,b, cost_svp = svp_classical,verbose=False):
 		print "Primal attacks uses block-size", b, "and ", m, "samples"
 
 	if s * sqrt(b) < delta**(2.*b-d-1) * q**(1.*m /d):
-		return cost_svp(b) # + log(n-b)/log(2)
+		return cost_svp(b)
 	else:
 		return log_infinity
 
@@ -48,7 +47,7 @@ def dual_cost(q,n,m,s,b, cost_svp = svp_classical, verbose = False):
 	l = delta**d * q**(1.*n/d)
 
 	tau = l * s / q
-	log2_eps = - pi * tau**2 / log(2)
+	log2_eps = - 2 * pi * pi * tau**2 / log(2)
 	global_log2_eps = log2_eps
 	log2_R = max( 0 , - 2 * log2_eps - nvec_sieve(b) ) 
 	if verbose:
@@ -63,7 +62,7 @@ def optimize_attack(q,n,k,s, cost_attack = primal_cost, cost_svp = svp_classical
 	best_b = 0
 	best_m = 0
 	for b in range(50,2*n+k+1):
-		if cost_svp(b) + log(n-b)/log(2) > best_cost:
+		if cost_svp(b) > best_cost:
 			break
 		for m in range(max(1,b-n),n+k ):
 			cost = cost_attack(q,n,m,s,b, cost_svp)
@@ -78,7 +77,7 @@ def optimize_attack(q,n,k,s, cost_attack = primal_cost, cost_svp = svp_classical
 
 
 
-## Create a report on the best BKZ primal attack
+## Create a report on the best primal and dual BKZ attacks
 def summarize_params(q,n,s, error_tol, security_only = True):
 	print "Parameters : q = ", q, "n = ", n , " sigma^2 = ", s**2
 
@@ -99,45 +98,52 @@ def summarize_params(q,n,s, error_tol, security_only = True):
 	(m_pq,b_pq,c_pq) = optimize_attack(q,n,k,s, cost_attack = primal_cost, cost_svp = svp_quantum, verbose = False)
 	(m_pp,b_pp,c_pp) = optimize_attack(q,n,k,s, cost_attack = primal_cost, cost_svp = svp_plausible, verbose = False)
 
-	assert m_pc == m_pq
-	assert m_pc == m_pp
-	assert b_pc == b_pq
-	assert b_pc == b_pp
+	if (m_pc - m_pq)>1:
+		print "m and b not equals among the three models"
+	if (m_pq - m_pp)>1:
+		print "m and b not equals among the three models"
+	if (b_pc - b_pq)>1:
+		print "m and b not equals among the three models"
+	if (b_pq - b_pp)>1:
+		print "m and b not equals among the three models"
 
-	print "Primal ", "&", m_pc, "&", b_pc, "&", int(floor(c_pc)), "&", int(floor(c_pq))	, "&", int(floor(c_pp)) 
+	print "Primal ", "&", m_pq, "&", b_pq, "&", int(floor(c_pc)), "&", int(floor(c_pq))	, "&", int(floor(c_pp)) 
 
 
-	(m_pc,b_pc,c_pc) = optimize_attack(q,n,k,s, cost_attack = dual_cost, cost_svp = svp_classical, verbose = True)
+	(m_pc,b_pc,c_pc) = optimize_attack(q,n,k,s, cost_attack = dual_cost, cost_svp = svp_classical, verbose = False)
 	(m_pq,b_pq,c_pq) = optimize_attack(q,n,k,s, cost_attack = dual_cost, cost_svp = svp_quantum, verbose = False)
 	(m_pp,b_pp,c_pp) = optimize_attack(q,n,k,s, cost_attack = dual_cost, cost_svp = svp_plausible, verbose = False)
 
-	assert m_pc == m_pq
-	assert m_pc == m_pp
-	assert b_pc == b_pq
-	assert b_pc == b_pp
+	if (m_pc - m_pq)>1:
+		print "m and b not equals among the three models"
+	if (m_pq - m_pp)>1:
+		print "m and b not equals among the three models"
+	if (b_pc - b_pq)>1:
+		print "m and b not equals among the three models"
+	if (b_pq - b_pp)>1:
+		print "m and b not equals among the three models"
 
-	print "Dual ", "&", m_pc, "&", b_pc, "&", int(floor(c_pc)), "&", int(floor(c_pq))	, "&", int(floor(c_pp)) 
+	print "Dual     ", "&", m_pq, "&", b_pq, "&", int(floor(c_pc)), "&", int(floor(c_pq))	, "&", int(floor(c_pp)) 
 
-
-
-print "### NTRU-256 ###"
-summarize_params(2048,743,sqrt(2./3), 0)
-print
 
 
 
 print "### BCNS ###"
 summarize_params(2**32,1024,3.192, 2**32 /8)
 print
-22
 
 q = 12289
+print "### JarJar ###"
+summarize_params(q,512,sqrt(24/2),   3.*q/(4 * sqrt(2)) )
+print
+
+print "### NTRU-743 ###"
+summarize_params(2048,743,sqrt(2./3), 0)
+print
+
 print "### NewHope ###"
 summarize_params(q,1024,sqrt(16/2),3.*q/4)
 print
 
 
-print "### JarJar ###"
-summarize_params(q,512,sqrt(24/2),   3.*q/(4 * sqrt(2)) )
-print
 
